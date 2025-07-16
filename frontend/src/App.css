@@ -1,0 +1,73 @@
+#root {
+  width: 80vw;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.mantine-Table-thead {
+  text-align: center;
+}
+.mantine-Table-th {
+  text-align: center;
+}
+
+.entity-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0 1rem 0;
+}
+
+.mantine-FileInput-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mantine-FileInput-input {
+  width: 25%;
+  min-width: 36px;
+  padding: 0;
+}
+
+/* Set visibility of file input children to hidden */
+.mantine-FileInput-input > * {
+  visibility: hidden;
+}
+
+.mantine-FileInput-input:hover {
+  /* Make it stylish */
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.mantine-FileInput-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.rotate-icon:hover {
+  animation: spin 2s infinite linear;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(360deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
+}

@@ -1,0 +1,86 @@
+
+services:
+  mysql:
+    image: mysql:8
+    restart: always
+    env_file: ./backend/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      # MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: no
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: ${BACKEND_PORT}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    command: >
+      sh -c "
+        npx prisma db push --schema ./prisma/schema.prisma --accept-data-loss &&
+        npx prisma generate --schema ./prisma/schema.prisma &&
+        npm run dev
+      "
+    develop:
+      watch:
+        - action: sync
+          path: ./routes
+          target: /app/routes
+        - action: sync
+          path: ./config
+          target: /app/config
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -s http://localhost:5000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: no
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file: ./frontend/.env
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+      PORT: ${FRONTEND_PORT}
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    command: >
+      sh -c "
+        npm run dev
+      "
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+
+volumes:
+  mysql-data:

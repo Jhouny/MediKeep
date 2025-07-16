@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  ID        String   @id // CPF, unique identifier
+  firstName String
+  lastName  String
+  birthDate DateTime
+  createdAt DateTime @default(now())
+  // Relations
+  records   Record[]
+}
+
+model RecordType {
+  ID        Int      @id @default(autoincrement())
+  name      String   // e.g., "X-Ray", "Blood Test", "Prescription", etc.
+  description String? // Optional description of the record type
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  // Relations
+  records   Record[]
+}
+
+model Record {
+  ID            Int      @id @default(autoincrement())
+  Patient       User     @relation(fields: [patientID], references: [ID], onDelete: Cascade)
+  patientID     String
+  date          DateTime
+  type          RecordType @relation(fields: [typeID], references: [ID])
+  typeID        Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt @default(now())
+  // Optional fields
+  doctor_name   String?
+  notes         String?
+  // Relations
+  documents     Document[]
+}
+
+model Document {
+  Record    Record   @relation(fields: [recordID], references: [ID], onDelete: Cascade)
+  recordID  Int
+  fileName  String
+  filePath  String
+  MIMEType  String
+  createdAt DateTime @default(now())
+
+  @@id([recordID, fileName, MIMEType])
+}
